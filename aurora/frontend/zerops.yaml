@@ -1,0 +1,17 @@
+zerops:
+  - setup: aurora-frontend
+    build:
+      base: nodejs@22
+      buildCommands:
+        - pnpm install
+        - pnpm build
+      deployFiles:
+        - ./dist
+    run:
+      base: static
+      envReplace:
+        delimiter:
+          - "__"
+          - "%%"
+        target:
+          - ./dist

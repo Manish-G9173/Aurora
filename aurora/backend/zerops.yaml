@@ -1,0 +1,70 @@
+zerops:
+  - setup: aurora-api
+    build:
+      base: python@3.12
+      buildCommands:
+        - pip3 install --upgrade pip
+        - pip3 install --no-cache-dir -r requirements.txt
+      deployFiles:
+        - ./app
+        - ./workers
+        - requirements.txt
+    run:
+      base: python@3.12
+      ports:
+        - port: 8000
+          httpSupport: true
+          wsSupport: true
+      envSecrets:
+        - GEMINI_API_KEY
+        - WORKER_SECRET
+      env:
+        - DATABASE_URL=postgresql+asyncpg://aurora:$POSTGRESQL_PASSWORD@$PRIVATE_POSTGRESQL_hostname:5432/aurora
+        - REDIS_URL=redis://$PRIVATE_VALKEY_hostname:6379/0
+        - S3_BUCKET=$OBJECTSTORAGE_bucketName
+        - S3_ACCESS_KEY=$OBJECTSTORAGE_accessKeyId
+        - S3_SECRET_KEY=$OBJECTSTORAGE_secretAccessKey
+        - S3_ENDPOINT=$OBJECTSTORAGE_s3Endpoint
+        - STORAGE_REGION=zerops
+        - STORAGE_FORCE_PATH_STYLE=true
+      start: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+    deploy:
+      readinessCheck:
+        httpGet:
+          path: /healthz
+          port: 8000
+
+  - setup: aurora-worker
+    build:
+      base: python@3.12
+      buildCommands:
+        - pip3 install --upgrade pip
+        - pip3 install --no-cache-dir -r requirements.txt
+      deployFiles:
+        - ./app
+        - ./workers
+        - requirements.txt
+    run:
+      base: python@3.12
+      envSecrets:
+        - GEMINI_API_KEY
+        - WORKER_SECRET
+      env:
+        - DATABASE_URL=postgresql+asyncpg://aurora:$POSTGRESQL_PASSWORD@$PRIVATE_POSTGRESQL_hostname:5432/aurora
+        - REDIS_URL=redis://$PRIVATE_VALKEY_hostname:6379/0
+        - S3_BUCKET=$OBJECTSTORAGE_bucketName
+        - S3_ACCESS_KEY=$OBJECTSTORAGE_accessKeyId
+        - S3_SECRET_KEY=$OBJECTSTORAGE_secretAccessKey
+        - S3_ENDPOINT=$OBJECTSTORAGE_s3Endpoint
+        - STORAGE_REGION=zerops
+        - STORAGE_FORCE_PATH_STYLE=true
+      crontab:
+        # Weekly coaching digest: every Monday 09:00
+        - command: python3 -m workers.digest_worker
+          timing: "0 9 * * 1"
+          allContainers: false
+          workingDir: /var/www
+    deploy:
+      # worker service does not expose ports
+      readinessCheck:
+        none

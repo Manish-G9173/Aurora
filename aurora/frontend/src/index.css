@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(51, 102, 255, 0.25), transparent),
+    #020617;
+  min-height: 100vh;
+}
+
+.glass {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 1rem;
+}
+
+.glass-soft {
+  background: rgba(30, 41, 59, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0.75rem;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5
+    font-semibold text-white shadow-lg shadow-brand-500/30 transition-all
+    hover:bg-brand-400 hover:shadow-brand-400/40 active:scale-[0.98]
+    disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700
+    px-5 py-2.5 font-medium text-slate-200 transition-all
+    hover:border-slate-500 hover:bg-slate-800/60;
+}
+
+.input {
+  @apply w-full rounded-lg border border-slate-700 bg-slate-900/70 px-4 py-2.5
+    text-white placeholder-slate-500 outline-none transition-colors
+    focus:border-brand-400 focus:ring-2 focus:ring-brand-500/30;
+}
